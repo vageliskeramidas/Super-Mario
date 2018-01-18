@@ -1,4 +1,3 @@
-
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -20,16 +19,11 @@ body {
 			create : create,
 			update : update,
 		}, false, false);
-
 		function preload() {
-
 			//  We need this because the assets are on github pages
 			//  Remove the next 2 lines if running locally
-
-
 			//this.load.baseURL = 'https://vageliskeramidas.github.io/Super-Mario/';
 			//this.load.crossOrigin = 'anonymous';
-
 			
 			game.load.audio('death', ['death.mp3', 'death.ogg']);
 			game.load.audio('pain',['aseme.mp3', 'aseme.ogg']);
@@ -46,15 +40,15 @@ body {
 			this.load.spritesheet('flag', 'assets/flag.png', 16, 16);
 			this.load.tilemap('level', 'assets/super_mario_map.json', null,
 					Phaser.Tilemap.TILED_JSON);
+			this.load.tilemap('level2', 'assets/super_mario_map2.json', null,
+					Phaser.Tilemap.TILED_JSON);
 		}
 		var lives = 3;
 		var livesString= '';
 		var livesText;
 		var score = 0;
-		
-var scoreString = '';
-		
-var scoreText;
+		var scoreString = '';		
+		var scoreText;
 		var hxosdeath;
 		var hxoscoinss;
 		var hxosstomp;
@@ -62,20 +56,46 @@ var scoreText;
 		var s;
 		var music;
 		var goombasdead = 18;
+		var lvlcount =0;
 		
-
 		function create() {
 			
-
-			var answer = confirm("Welcome to MARIO .You will play the first level.\n If you want to play the second level press cancel in this message");
-			if (answer) {
+                       if (lvlcount==0){ 
+                        var popup = confirm("You will play MARIO . IF you want to play the first level press confirm or if you want to play level 2 press cancel\n HAVE FUN !!!");
+			if (popup) {
 			game.state.start;
-			}
-			
-			music = game.add.audio('pain');
-			music.play();
-		
+                       map = game.add.tilemap('level');
+			map.addTilesetImage('tiles', 'tiles');
+			map.setCollisionBetween(3, 12, true, 'solid');
+                        map.createLayer('background');
 
+			layer = map.createLayer('solid');
+			layer.resizeWorld();
+
+
+			} else {
+                           map = game.add.tilemap('level2');
+			map.addTilesetImage('tiles', 'tiles');
+			map.setCollisionBetween(3, 12, true, 'solid');
+                        map.createLayer('background');
+
+			layer = map.createLayer('solid');
+			layer.resizeWorld();
+
+         
+			}
+		}
+                if (lvlcount==1){
+                   map = game.add.tilemap('level2');
+			map.addTilesetImage('tiles', 'tiles');
+			map.setCollisionBetween(3, 12, true, 'solid');
+                        map.createLayer('background');
+
+			layer = map.createLayer('solid');
+			layer.resizeWorld();
+}
+
+	
 			Phaser.Canvas.setImageRenderingCrisp(game.canvas)
 			game.scale.pageAlignHorizontally = true;
 			game.scale.pageAlignVertically = true
@@ -83,15 +103,9 @@ var scoreText;
 			game.physics.startSystem(Phaser.Physics.ARCADE);
 
 			game.stage.backgroundColor = '#5c94fc';
+                        music = game.add.audio('pain');
+                        music.play();
 
-			map = game.add.tilemap('level');
-			map.addTilesetImage('tiles', 'tiles');
-			map.setCollisionBetween(3, 12, true, 'solid');
-
-			map.createLayer('background');
-
-			layer = map.createLayer('solid');
-			layer.resizeWorld();
 
 			coins = game.add.group();
 			coins.enableBody = true;
@@ -107,6 +121,7 @@ var scoreText;
 			doors.callAll('animations.add', 'animations', 'spin',
 					[ 0, 0, 1, 2 ], 3, true);
 			doors.callAll('animations.play', 'animations', 'spin');
+
 
 			flags = game.add.group();
 			flags.enableBody = true;
@@ -137,21 +152,17 @@ var scoreText;
 			enemywans.setAll('body.velocity.x', -20);
 			enemywans.setAll('body.gravity.y', 500);
 
+
 			scoreString = 'Score \n ';
-    
 			scoreText = game.add.text(2, 2, scoreString + score, { font: '13px Arial', fill: '#fff' });
 			scoreText.fixedToCamera = true;
 			scoreText.cameraOffset.setTo(2, 2);
-
-
 			livesString = 'Lives : x';
     
 			livesText = game.add.text(150, 2, livesString + lives, { font: '13px Arial', fill: '#fff' });
 			livesText.fixedToCamera = true;
 			livesText.cameraOffset.setTo(150, 2);
 			
-
-
 			player = game.add.sprite(16, game.world.height - 48, 'mario');
 			player.animations.add('celebration', [6, 12, 5, 0], 3, false);
 			game.physics.arcade.enable(player);
@@ -161,13 +172,9 @@ var scoreText;
 			player.animations.add('walkLeft', [ 8, 9, 10 ], 10, true);
 			player.goesRight = true;
 			game.camera.follow(player);
-
 			cursors = game.input.keyboard.createCursorKeys();
 		}
-
-
 		function update() {
-
 			game.physics.arcade.collide(player, layer);
 			game.physics.arcade.collide(goombas, layer);
 			game.physics.arcade.collide(enemywans, layer);
@@ -194,14 +201,12 @@ var scoreText;
 					else
 						player.frame = 7;
 				}
-
 				if (cursors.up.isDown && player.body.onFloor()) {
 					hxosjump = game.add.audio('jump');
 					hxosjump.play();
 					player.body.velocity.y = -190;
 					player.animations.stop();
 				}
-
 				if (player.body.velocity.y != 0) {
 					if (player.goesRight)
 						player.frame = 5
@@ -210,19 +215,26 @@ var scoreText;
 				}
 			}
 		}
-
-
 		function flagOverlap(player, flag) {
 		player.animations.play("celebration");
 		flag.kill();
 		music.stop();
 		player.animations.stop();
 		player.body.enable = false;
+		lvlcount++;
 		game.time.events.add(Phaser.Timer.SECOND * 3, function(){
+			score = 0;
+			goombasdead =18;
 			game.paused = true;
 			game.paused = false;
 			game.state.restart();
-			score = 0;
+			map = game.add.tilemap('level2');
+			map.addTilesetImage('tiles', 'tiles');
+			map.setCollisionBetween(3, 12, true, 'solid');
+                        map.createLayer('background');
+
+			layer = map.createLayer('solid');
+			layer.resizeWorld();
 			lives = 3;
 			livesString = 'Lives : x';
     
@@ -231,19 +243,14 @@ var scoreText;
 			livesText.cameraOffset.setTo(150, 2);
 			});
 		}
-
-
-
 		function doorOverlap(player, door) {
 		door.kill();
 		player.body.enable = false;
 		game.time.events.add(Phaser.Timer.SECOND * 3, function(){
 			player.body.enable =  true;
-			player.reset(0,0);
+			player.reset(170,3);
 			});
 		}
-
-
 		function coinOverlap(player, coin) {
 		hxoscoinss = game.add.audio('coinss');
 		hxoscoinss.play();
@@ -261,7 +268,6 @@ var scoreText;
 				hxosstomp = game.add.audio('stomp');
 				hxosstomp.play();
 				score += 50;
-    
 				scoreText.text = scoreString + score;
 				player.body.velocity.y = -80;
 				game.time.events.add(Phaser.Timer.SECOND, function() {
@@ -277,14 +283,14 @@ var scoreText;
 				music.stop();
 				game.state.restart();
 				lives -= 1;
+				score = 0;
+                                goombasdead=0;
 				livesString = 'Lives : x';
-    
 				livesText = game.add.text(2, 20, livesString + lives, { font: '13px Arial', fill: '#fff' });
 				livesText.fixedToCamera = true;
 				livesText.cameraOffset.setTo(2, 20);
 				});
-				if ( lives == 0)
-				{
+				if ( lives == 0){
 				hxosdeath = game.add.audio('death');
 				hxosdeath.play();
 				player.frame = 6;
@@ -296,9 +302,9 @@ var scoreText;
 				if (answer) {
 					game.paused= false;
 					game.state.restart();
+					lvlcount = 0;
 					lives = 3;
 					livesString = 'Lives : x';
-    
 					livesText = game.add.text(150, 2, livesString + lives, { font: '13px Arial', fill: '#fff' });
 					livesText.fixedToCamera = true;
 					livesText.cameraOffset.setTo(150, 2);
@@ -314,7 +320,6 @@ var scoreText;
 				hxosstomp = game.add.audio('stomp');
 				hxosstomp.play();
 				score += 50;
-    
 				scoreText.text = scoreString + score;
 				player.body.velocity.y = -80;
 				game.time.events.add(Phaser.Timer.SECOND, function() {
@@ -335,14 +340,14 @@ var scoreText;
 				music.stop();
 				game.state.restart();
 				lives -= 1;
+				score = 0;
+				goombasdead = 0;
 				livesString = 'Lives : x';
-    
 				livesText = game.add.text(2, 20, livesString + lives, { font: '13px Arial', fill: '#fff' });
 				livesText.fixedToCamera = true;
 				livesText.cameraOffset.setTo(2, 20);
 				});
-				if ( lives == 0)
-				{
+				if ( lives == 0) {
 				hxosdeath = game.add.audio('death');
 				hxosdeath.play();
 				player.frame = 6;
@@ -354,10 +359,9 @@ var scoreText;
 				if (answer) {
 					game.paused= false;
 					game.state.restart();
-					score = 0;
+					lvlcount = 0; 
 					lives = 3;
 					livesString = 'Lives : x';
-    
 					livesText = game.add.text(150, 2, livesString + lives, { font: '13px Arial', fill: '#fff' });
 					livesText.fixedToCamera = true;
 					livesText.cameraOffset.setTo(150, 2);
@@ -365,10 +369,6 @@ var scoreText;
 				}
 			}
 		}
-
-
-
-
 	</script>
 </body>
 </html>
